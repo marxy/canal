@@ -170,7 +170,14 @@ public class MQMessageUtils {
             String tableName = entry.getHeader().getTableName();
 
             if (StringUtils.isEmpty(schemaName) || StringUtils.isEmpty(tableName)) {
-                logger.warn("【{}】schemaName={} or tableName={} is empty, please check it.", entry.getEntryType(), schemaName, tableName);
+                String sql = "";
+                try {
+                    RowChange rowChange = RowChange.parseFrom(entry.getStoreValue());
+                    sql = rowChange.getSql();
+                } catch (InvalidProtocolBufferException e) {
+                    // ignore
+                }
+                logger.warn("【{}】schemaName={} or tableName={} is empty, please check it. sql={}", entry.getEntryType(), schemaName, tableName, sql);
                 if (StringUtils.isNotBlank(defaultTopic)) {
                     put2MapMessage(messages, message.getId(), defaultTopic, entry);
                 }
