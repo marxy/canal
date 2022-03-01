@@ -77,7 +77,28 @@ public class CanalKafkaProducer extends AbstractMQProducer implements CanalMQPro
                 logger.error(errorMsg);
                 throw new RuntimeException(errorMsg);
             }
+        } else {
+            Object jaasFileConfig = kafkaProducerConfig.getSecurityJaasFile();
+            if (jaasFileConfig != null) {
+                File jaasFile = new File(jaasFileConfig.toString());
+                String absolutePath = null;
+                if (jaasFile.exists()) {
+                    absolutePath = jaasFile.getAbsolutePath();
+                } else {
+                    File file = new File(jaasFileConfig.toString());
+                    if (file.exists()) {
+                        absolutePath = file.getAbsolutePath();
+                    } else {
+                        String errorMsg = "ERROR # The kafka jaas configuration file does not exist! please check it: " + jaasFileConfig.toString();
+                        logger.error(errorMsg);
+                        throw new RuntimeException(errorMsg);
+                    }
+                }
+                System.setProperty("java.security.auth.login.config", absolutePath);
+                logger.info("security jaas file load success.");
+            }
         }
+
         kafkaProperties.put("value.serializer", KafkaMessageSerializer.class);
         producer = new KafkaProducer<>(kafkaProperties);
     }
@@ -120,6 +141,13 @@ public class CanalKafkaProducer extends AbstractMQProducer implements CanalMQPro
         if (!StringUtils.isEmpty(jaasFile)) {
             kafkaProducerConfig.setJaasFile(jaasFile);
         }
+
+        // security jaas file
+        String securityJaasFile = PropertiesUtils.getProperty(properties, KafkaConstants.CANAL_MQ_KAFKA_SECURITY_JAAS_FILE);
+        if (!StringUtils.isEmpty(securityJaasFile)) {
+            kafkaProducerConfig.setSecurityJaasFile(securityJaasFile);
+        }
+
     }
 
     @Override
@@ -165,11 +193,13 @@ public class CanalKafkaProducer extends AbstractMQProducer implements CanalMQPro
                 result = template.waitForResult();
             } else {
                 result = new ArrayList();
-                List<Future> futures = send(mqDestination,
-                    mqDestination.getTopic(),
-                    message,
-                    mqProperties.isFlatMessage());
-                result.add(futures);
+                if (StringUtils.isNotBlank(mqDestination.getTopic())) {
+                    List<Future> futures = send(mqDestination,
+                            mqDestination.getTopic(),
+                            message,
+                            mqProperties.isFlatMessage());
+                    result.add(futures);
+                }
             }
 
             // 一个批次的所有topic和分区的队列，都采用异步的模式进行多线程批量发送

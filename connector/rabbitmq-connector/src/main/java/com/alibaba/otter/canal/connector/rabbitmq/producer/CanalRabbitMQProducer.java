@@ -127,7 +127,9 @@ public class CanalRabbitMQProducer extends AbstractMQProducer implements CanalMQ
 
                 template.waitForResult();
             } else {
-                send(destination, destination.getTopic(), message);
+                if (StringUtils.isNotBlank(destination.getTopic())) {
+                    send(destination, destination.getTopic(), message);
+                }
             }
             callback.commit();
         } catch (Throwable e) {

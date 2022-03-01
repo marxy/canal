@@ -13,4 +13,6 @@ public class KafkaConstants {
     public static final String CANAL_MQ_KAFKA_KERBEROS_ENABLE    = ROOT + "." + "kerberos.enable";
     public static final String CANAL_MQ_KAFKA_KERBEROS_KRB5_FILE = ROOT + "." + "kerberos.krb5.file";
     public static final String CANAL_MQ_KAFKA_KERBEROS_JAAS_FILE = ROOT + "." + "kerberos.jaas.file";
+
+    public static final String CANAL_MQ_KAFKA_SECURITY_JAAS_FILE = ROOT + "." + "security.jaas.file";
 }

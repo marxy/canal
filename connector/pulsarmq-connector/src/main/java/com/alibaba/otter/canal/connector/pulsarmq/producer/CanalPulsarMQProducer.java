@@ -151,7 +151,9 @@ public class CanalPulsarMQProducer extends AbstractMQProducer implements CanalMQ
 
                 template.waitForResult();
             } else {
-                send(destination, destination.getTopic(), message);
+                if (StringUtils.isNotBlank(destination.getTopic())) {
+                    send(destination, destination.getTopic(), message);
+                }
             }
 
             callback.commit();
@@ -175,7 +177,6 @@ public class CanalPulsarMQProducer extends AbstractMQProducer implements CanalMQ
      * @since 1.0.0 by chad at 2021/9/2: 新增
      */
     public void send(final MQDestination destination, String topicName, com.alibaba.otter.canal.protocol.Message message) {
-
         // 获取当前topic的分区数
         Integer partitionNum = MQMessageUtils.parseDynamicTopicPartition(topicName,
                 destination.getDynamicTopicPartitionNum());

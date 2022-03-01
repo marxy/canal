@@ -150,6 +150,9 @@ public class CanalMQStarter {
                 MQDestination canalDestination = new MQDestination();
                 canalDestination.setCanalDestination(destination);
                 CanalMQConfig mqConfig = canalInstance.getMqConfig();
+                if (StringUtils.isEmpty(mqConfig.getTopic())) {
+                    logger.warn("the default topic is empty, so it will not send message to default topic!!!");
+                }
                 canalDestination.setTopic(mqConfig.getTopic());
                 canalDestination.setPartition(mqConfig.getPartition());
                 canalDestination.setDynamicTopic(mqConfig.getDynamicTopic());

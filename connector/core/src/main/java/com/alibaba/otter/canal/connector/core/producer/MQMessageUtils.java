@@ -24,6 +24,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MigrateMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * process MQ Message utils
@@ -32,6 +34,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * @since 5.0.0
  */
 public class MQMessageUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(MQMessageUtils.class);
+
 
     private static Map<String, List<PartitionData>>    partitionDatas    = MigrateMap.makeComputingMap(CacheBuilder.newBuilder()
                                                                              .softValues(),
@@ -165,7 +170,10 @@ public class MQMessageUtils {
             String tableName = entry.getHeader().getTableName();
 
             if (StringUtils.isEmpty(schemaName) || StringUtils.isEmpty(tableName)) {
-                put2MapMessage(messages, message.getId(), defaultTopic, entry);
+                logger.warn("【{}】schemaName={} or tableName={} is empty, please check it.", entry.getEntryType(), schemaName, tableName);
+                if (StringUtils.isNotBlank(defaultTopic)) {
+                    put2MapMessage(messages, message.getId(), defaultTopic, entry);
+                }
             } else {
                 Set<String> topics = matchTopics(schemaName + "." + tableName, dynamicTopicConfigs);
                 if (topics != null) {
@@ -179,7 +187,9 @@ public class MQMessageUtils {
                             put2MapMessage(messages, message.getId(), topic, entry);
                         }
                     } else {
-                        put2MapMessage(messages, message.getId(), defaultTopic, entry);
+                        if (StringUtils.isNotBlank(defaultTopic)) {
+                            put2MapMessage(messages, message.getId(), defaultTopic, entry);
+                        }
                     }
                 }
             }

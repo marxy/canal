@@ -19,6 +19,8 @@ public class KafkaProducerConfig extends MQProperties {
     private String              krb5File;
     private String              jaasFile;
 
+    private String  securityJaasFile;
+
     public Map<String, Object> getKafkaProperties() {
         return kafkaProperties;
     }
@@ -49,5 +51,13 @@ public class KafkaProducerConfig extends MQProperties {
 
     public void setJaasFile(String jaasFile) {
         this.jaasFile = jaasFile;
+    }
+
+    public String getSecurityJaasFile() {
+        return securityJaasFile;
+    }
+
+    public void setSecurityJaasFile(String securityJaasFile) {
+        this.securityJaasFile = securityJaasFile;
     }
 }
